@@ -1,4 +1,5 @@
 import struct
+import datetime
 
 path = "sample/putty.exe"
 
@@ -23,6 +24,10 @@ else:
 
 machine = struct.unpack('<H', data[e_lfanew+4:e_lfanew+6])[0]
 number_of_sections = struct.unpack('<H', data[e_lfanew+6:e_lfanew+8])[0]
+time_date_stamp = struct.unpack('<I', data[e_lfanew+8:e_lfanew+12])[0]
+
+build_date = datetime.datetime.fromtimestamp(time_date_stamp, datetime.UTC)
+print(build_date)
 
 print(hex(machine))
 print(number_of_sections)
