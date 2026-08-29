@@ -1,7 +1,7 @@
 import struct
 import datetime
 
-path = "sample/putty.exe"
+path = "sample/7z2409-x64.exe"
 
 with open(path, 'rb') as f:
     data = f.read()
