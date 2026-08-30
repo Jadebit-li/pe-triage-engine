@@ -34,7 +34,27 @@ characteristics = file_header[6]
 
 build_date = datetime.datetime.fromtimestamp(time_date_stamp, datetime.UTC)
 
+address_of_entry_point = struct.unpack('<I', data[e_lfanew+40:e_lfanew+44])[0]
+section_table_start = e_lfanew + 24 + size_of_optional_header
+
+
+
+
+
 print(hex(machine))
 print(number_of_sections)
 print(build_date)
 print(size_of_optional_header)
+print(hex(address_of_entry_point))
+print(hex(section_table_start))
+
+for i in range(number_of_sections):
+    entry_offset = section_table_start + (i * 40)
+    print(hex(entry_offset))
+    
+    section_entry = struct.unpack('<8sIIIIIIHHI', data[entry_offset:entry_offset+40])
+    name = section_entry[0]
+    name = name.rstrip(b'\x00').decode('ascii')
+    size_of_raw_data = section_entry[3]
+    pointer_to_raw_data = section_entry[4]
+    print(name, hex(size_of_raw_data), hex(pointer_to_raw_data))
