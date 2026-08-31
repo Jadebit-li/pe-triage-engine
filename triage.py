@@ -1,5 +1,7 @@
 import struct
 import datetime
+from collections import Counter
+import math
 
 path = "sample/7z2409-x64.exe"
 
@@ -37,6 +39,18 @@ build_date = datetime.datetime.fromtimestamp(time_date_stamp, datetime.UTC)
 address_of_entry_point = struct.unpack('<I', data[e_lfanew+40:e_lfanew+44])[0]
 section_table_start = e_lfanew + 24 + size_of_optional_header
 
+def entropy(data):
+    counts = Counter(data)
+    total = len(data)
+    
+    total_entropy = 0.0
+    
+    for occurrences in counts.values():
+        probability = occurrences / total
+        total_entropy += probability * math.log2(probability)
+    
+    return -total_entropy
+
 
 
 
@@ -58,3 +72,5 @@ for i in range(number_of_sections):
     size_of_raw_data = section_entry[3]
     pointer_to_raw_data = section_entry[4]
     print(name, hex(size_of_raw_data), hex(pointer_to_raw_data))
+
+print(entropy(data))
