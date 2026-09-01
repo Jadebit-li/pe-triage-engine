@@ -71,6 +71,10 @@ for i in range(number_of_sections):
     name = name.rstrip(b'\x00').decode('ascii')
     size_of_raw_data = section_entry[3]
     pointer_to_raw_data = section_entry[4]
-    print(name, hex(size_of_raw_data), hex(pointer_to_raw_data))
+
+    section_bytes = data[pointer_to_raw_data : pointer_to_raw_data + size_of_raw_data]
+    section_entropy = entropy(section_bytes)
+
+    print(name, hex(size_of_raw_data), hex(pointer_to_raw_data), section_entropy)
 
 print(entropy(data))
