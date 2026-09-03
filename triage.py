@@ -3,7 +3,7 @@ import datetime
 from collections import Counter
 import math
 
-path = "sample/7z2409-x64.exe"
+path = "sample/putty.exe"
 
 with open(path, 'rb') as f:
     data = f.read()
@@ -12,8 +12,8 @@ with open(path, 'rb') as f:
 e_magic = struct.unpack('<H', data[0:2])[0]
 e_lfanew = struct.unpack('<I', data[60:64])[0]
 
-print(hex(e_magic))
-print(hex(e_lfanew))
+print(f"e_magic: {hex(e_magic)}")
+print(f"e_lfanew: {hex(e_lfanew)}")
 
 # PE signature check
 pe_signature = data[e_lfanew:e_lfanew + 4]
@@ -52,19 +52,16 @@ def entropy(data):
     return -total_entropy
 
 
-
-
-
-print(hex(machine))
-print(number_of_sections)
-print(build_date)
-print(size_of_optional_header)
-print(hex(address_of_entry_point))
-print(hex(section_table_start))
+print(f"machine info: {hex(machine)}")
+print(f"number of sections: {number_of_sections}")
+print(f"date of build: {build_date}")
+print(f"size of optional header: {size_of_optional_header}")
+print(f"address of entry point: {hex(address_of_entry_point)}")
+print(f"start of section table: {hex(section_table_start)}")
 
 for i in range(number_of_sections):
     entry_offset = section_table_start + (i * 40)
-    print(hex(entry_offset))
+    # print(hex(entry_offset))
     
     section_entry = struct.unpack('<8sIIIIIIHHI', data[entry_offset:entry_offset+40])
     name = section_entry[0]
@@ -75,6 +72,8 @@ for i in range(number_of_sections):
     section_bytes = data[pointer_to_raw_data : pointer_to_raw_data + size_of_raw_data]
     section_entropy = entropy(section_bytes)
 
-    print(name, hex(size_of_raw_data), hex(pointer_to_raw_data), section_entropy)
+    print(f"{name}: raw_size={hex(size_of_raw_data)}, entropy={section_entropy:.2f}")
 
-print(entropy(data))
+print(f"entropy of the entire executable: {entropy(data):.2f}")
+
+
