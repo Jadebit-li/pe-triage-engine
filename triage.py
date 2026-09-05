@@ -60,11 +60,17 @@ print(f"size of optional header: {size_of_optional_header}")
 print(f"address of entry point: {hex(address_of_entry_point)}")
 print(f"start of section table: {hex(section_table_start)}")
 
+sections = []
+
 for i in range(number_of_sections):
     entry_offset = section_table_start + (i * 40)
     # print(hex(entry_offset))
     
     section_entry = struct.unpack('<8sIIIIIIHHI', data[entry_offset:entry_offset+40])
+    virtual_address = section_entry[2]
+    virtual_size = section_entry[1]
+    
+    
     name = section_entry[0]
     name = name.rstrip(b'\x00').decode('ascii')
     size_of_raw_data = section_entry[3]
@@ -74,6 +80,11 @@ for i in range(number_of_sections):
     section_entropy = entropy(section_bytes)
 
     print(f"{name}: raw_size={hex(size_of_raw_data)}, entropy={section_entropy:.2f}")
+
+    sections.append({"name": name, 
+                     "virtual_address": virtual_address, 
+                     "virtual_size": virtual_size, 
+                     "pointer_to_raw_data": pointer_to_raw_data})
 
 print(f"entropy of the entire executable: {entropy(data):.2f}")
 
@@ -86,6 +97,21 @@ import_table_size = start_of_data_dir[1]
 
 print(f"import directory table rva: {hex(import_table_rva)}")
 print(f"size of import table: {hex(import_table_size)}")
+
+def rva_to_offset(rva):
+    for section in sections:
+        start = section["virtual_address"]
+        end = start + section["virtual_size"]
+        
+        if start <= rva < end:
+            distance_into_section = rva - start
+            file_offset = section["pointer_to_raw_data"] + distance_into_section
+            return file_offset
+
+import_table_offset = rva_to_offset(import_table_rva)
+print(hex(import_table_offset))
+
+
 
 
 
