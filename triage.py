@@ -38,6 +38,7 @@ build_date = datetime.datetime.fromtimestamp(time_date_stamp, datetime.UTC)
 
 address_of_entry_point = struct.unpack('<I', data[e_lfanew+40:e_lfanew+44])[0]
 section_table_start = e_lfanew + 24 + size_of_optional_header
+optional_header_start = e_lfanew + 24
 
 def entropy(data):
     counts = Counter(data)
@@ -75,5 +76,16 @@ for i in range(number_of_sections):
     print(f"{name}: raw_size={hex(size_of_raw_data)}, entropy={section_entropy:.2f}")
 
 print(f"entropy of the entire executable: {entropy(data):.2f}")
+
+import_dir_offset = size_of_optional_header + optional_header_start - 128 + (1*8)
+
+start_of_data_dir = struct.unpack('<II', data[import_dir_offset:import_dir_offset+8])
+
+import_table_rva = start_of_data_dir[0]
+import_table_size = start_of_data_dir[1]
+
+print(f"import directory table rva: {hex(import_table_rva)}")
+print(f"size of import table: {hex(import_table_size)}")
+
 
 
