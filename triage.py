@@ -111,24 +111,56 @@ def rva_to_offset(rva):
 import_table_offset = rva_to_offset(import_table_rva)
 print(hex(import_table_offset))
 
+def read_string(offset):
+    name_bytes = bytearray()
+    pos = offset
+    
+    while True:
+        current_byte = data[pos]
+        
+        if current_byte == 0:
+            break
+        
+        name_bytes.append(current_byte)
+        pos += 1
+    
+    name = name_bytes.decode('ascii')
+    return name
+
 i = 0
 while True:
     entry_offset = import_table_offset + (i * 20)
     import_entry = struct.unpack('<IIIII', data[entry_offset:entry_offset+20])
-    print(import_entry)
+    
     all_zero = True
     for n in import_entry:
         if n != 0:
             all_zero = False
-
-    # if all(n == 0 for n in import_entry):
-    # break
-
+    
     if all_zero:
         break
     
+    dll_name_offset = rva_to_offset(import_entry[3])
+    dll_name = read_string(dll_name_offset)
+    print(f" DLL name: {dll_name}")
+    
+    ilt_offset = rva_to_offset(import_entry[0])
+    
+    j = 0
+    while True:
+        thunk_offset = ilt_offset + (j * 8)
+        thunk = struct.unpack('<Q', data[thunk_offset:thunk_offset+8])[0]
+        
+        if thunk == 0:
+            break
+        
+        if thunk & 0x8000000000000000:
+            print("   (ordinal import, name unavailable)")
+        else:
+            hint_name_offset = rva_to_offset(thunk)
+            function_name = read_string(hint_name_offset + 2)
+            print(f"   function: {function_name}")
+        
+        j += 1
+    
     i += 1
-
-
-
-
