@@ -111,6 +111,23 @@ def rva_to_offset(rva):
 import_table_offset = rva_to_offset(import_table_rva)
 print(hex(import_table_offset))
 
+i = 0
+while True:
+    entry_offset = import_table_offset + (i * 20)
+    import_entry = struct.unpack('<IIIII', data[entry_offset:entry_offset+20])
+    print(import_entry)
+    all_zero = True
+    for n in import_entry:
+        if n != 0:
+            all_zero = False
+
+    # if all(n == 0 for n in import_entry):
+    # break
+
+    if all_zero:
+        break
+    
+    i += 1
 
 
 
