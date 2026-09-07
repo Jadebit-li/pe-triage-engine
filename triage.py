@@ -2,8 +2,9 @@ import struct
 import datetime
 from collections import Counter
 import math
+import hashlib
 
-path = "sample/putty.exe"
+path = "sample/7z2409-x64.exe"
 
 with open(path, 'rb') as f:
     data = f.read()
@@ -127,6 +128,17 @@ def read_string(offset):
     name = name_bytes.decode('ascii')
     return name
 
+imphash_parts = []
+
+if machine == 0x8664:
+    thunk_size = 8
+    thunk_format = '<Q'
+    ordinal_flag = 0x8000000000000000
+else:
+    thunk_size = 4
+    thunk_format = '<I'
+    ordinal_flag = 0x80000000
+
 i = 0
 while True:
     entry_offset = import_table_offset + (i * 20)
@@ -148,19 +160,24 @@ while True:
     
     j = 0
     while True:
-        thunk_offset = ilt_offset + (j * 8)
-        thunk = struct.unpack('<Q', data[thunk_offset:thunk_offset+8])[0]
-        
+        thunk_offset = ilt_offset + (j * thunk_size)
+        thunk = struct.unpack(thunk_format, data[thunk_offset:thunk_offset+thunk_size])[0]
+    
         if thunk == 0:
             break
         
-        if thunk & 0x8000000000000000:
+        if thunk & ordinal_flag:
             print("   (ordinal import, name unavailable)")
         else:
             hint_name_offset = rva_to_offset(thunk)
             function_name = read_string(hint_name_offset + 2)
             print(f"   function: {function_name}")
+            imphash_parts.append(f"{dll_name}.{function_name}".lower())
         
         j += 1
     
     i += 1
+
+joined = ",".join(imphash_parts)
+imphash = hashlib.md5(joined.encode()).hexdigest()
+print(imphash)
