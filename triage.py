@@ -4,6 +4,17 @@ from collections import Counter
 import math
 import hashlib
 
+suspicious_apis = [
+    "VirtualAllocEx",
+    "WriteProcessMemory",
+    "CreateRemoteThread",
+    "NtUnmapViewOfSection",
+    "VirtualProtectEx",
+    "NtCreateThreadEx",
+    "SetWindowsHookEx",
+    "QueueUserAPC"
+]
+
 path = "sample/7z2409-x64.exe"
 
 with open(path, 'rb') as f:
