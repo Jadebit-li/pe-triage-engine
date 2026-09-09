@@ -141,6 +141,8 @@ def read_string(offset):
 
 imphash_parts = []
 
+found_suspicious = []
+
 if machine == 0x8664:
     thunk_size = 8
     thunk_format = '<Q'
@@ -182,6 +184,8 @@ while True:
         else:
             hint_name_offset = rva_to_offset(thunk)
             function_name = read_string(hint_name_offset + 2)
+            if function_name in suspicious_apis:
+                found_suspicious.append(function_name)
             print(f"   function: {function_name}")
             imphash_parts.append(f"{dll_name}.{function_name}".lower())
         
@@ -192,3 +196,5 @@ while True:
 joined = ",".join(imphash_parts)
 imphash = hashlib.md5(joined.encode()).hexdigest()
 print(imphash)
+
+print(f"suspicious APIs found: {found_suspicious}")
