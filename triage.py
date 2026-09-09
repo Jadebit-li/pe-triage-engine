@@ -186,7 +186,7 @@ while True:
             function_name = read_string(hint_name_offset + 2)
             if function_name in suspicious_apis:
                 found_suspicious.append(function_name)
-            print(f"   function: {function_name}")
+            # print(f"   function: {function_name}")
             imphash_parts.append(f"{dll_name}.{function_name}".lower())
         
         j += 1
