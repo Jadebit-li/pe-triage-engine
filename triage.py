@@ -3,6 +3,13 @@ import datetime
 from collections import Counter
 import math
 import hashlib
+import argparse
+
+parser = argparse.ArgumentParser(description="PE Triage Engine - static malware analysis tool")
+parser.add_argument("filepath", help="Path to the PE file to analyze")
+args = parser.parse_args()
+
+path = args.filepath
 
 suspicious_apis = [
     "VirtualAllocEx",
@@ -15,7 +22,6 @@ suspicious_apis = [
     "QueueUserAPC"
 ]
 
-path = "sample/7z2409-x64.exe"
 
 with open(path, 'rb') as f:
     data = f.read()
