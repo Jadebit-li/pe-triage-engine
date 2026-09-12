@@ -5,12 +5,14 @@ import math
 import hashlib
 import argparse
 
+# accepting the target file path via the command line
 parser = argparse.ArgumentParser(description="PE Triage Engine - static malware analysis tool")
 parser.add_argument("filepath", help="Path to the PE file to analyze")
 args = parser.parse_args()
 
 path = args.filepath
 
+# list of suspicious APIs that we will check our functions against
 suspicious_apis = [
     "VirtualAllocEx",
     "WriteProcessMemory",
@@ -22,11 +24,13 @@ suspicious_apis = [
     "QueueUserAPC"
 ]
 
-
+# we only read the file we don't run it
 with open(path, 'rb') as f:
     data = f.read()
 
 # DOS header
+# e_magc is = MZ, it is an indicator that this thing is a PE file
+# e_lfanew is the VA of the start of PE header
 e_magic = struct.unpack('<H', data[0:2])[0]
 e_lfanew = struct.unpack('<I', data[60:64])[0]
 
@@ -173,6 +177,7 @@ while True:
     
     dll_name_offset = rva_to_offset(import_entry[3])
     dll_name = read_string(dll_name_offset)
+    dll_name_for_hash = dll_name.split('.')[0]
     print(f" DLL name: {dll_name}")
     
     ilt_offset = rva_to_offset(import_entry[0])
@@ -186,14 +191,17 @@ while True:
             break
         
         if thunk & ordinal_flag:
-            print("   (ordinal import, name unavailable)")
+            ordinal_number = thunk & 0xFFFF
+            print(f"   (ordinal import: {ordinal_number}, name unavailable)")
+            imphash_parts.append(f"{dll_name_for_hash}.ord{ordinal_number}".lower())
+        
         else:
             hint_name_offset = rva_to_offset(thunk)
             function_name = read_string(hint_name_offset + 2)
             if function_name in suspicious_apis:
                 found_suspicious.append(function_name)
-            # print(f"   function: {function_name}")
-            imphash_parts.append(f"{dll_name}.{function_name}".lower())
+            print(f"   function: {function_name}")
+            imphash_parts.append(f"{dll_name_for_hash}.{function_name}".lower())
         
         j += 1
     
