@@ -48,9 +48,13 @@ else:
 # File Header — one struct call for all 7 fields
 file_header = struct.unpack('<HHIIIHH', data[e_lfanew+4:e_lfanew+24])
 
+# machine info
 machine = file_header[0]
+# number of sections lol
 number_of_sections = file_header[1]
+# time since the file was created
 time_date_stamp = file_header[2]
+# 
 pointer_to_symbol_table = file_header[3]
 number_of_symbols = file_header[4]
 size_of_optional_header = file_header[5]
