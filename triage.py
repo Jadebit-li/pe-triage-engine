@@ -30,7 +30,7 @@ with open(path, 'rb') as f:
 
 # DOS header
 # e_magc is = MZ, it is an indicator that this thing is a PE file
-# e_lfanew is the VA of the start of PE header
+# e_lfanew is the file offset to the start of PE header
 e_magic = struct.unpack('<H', data[0:2])[0]
 e_lfanew = struct.unpack('<I', data[60:64])[0]
 
@@ -50,16 +50,17 @@ file_header = struct.unpack('<HHIIIHH', data[e_lfanew+4:e_lfanew+24])
 
 # machine info
 machine = file_header[0]
-# number of sections lol
+# number of sections
 number_of_sections = file_header[1]
-# time since the file was created
+# time_date_stamp: Unix timestamp of when the file was compiled/linked
 time_date_stamp = file_header[2]
-# 
+# deprecated COFF debug field, typically 0 in modern PE files, unused in this tool
 pointer_to_symbol_table = file_header[3]
 number_of_symbols = file_header[4]
+# size in bytes of the Optional Header that follows; used to calculate where the Section Table starts
 size_of_optional_header = file_header[5]
 characteristics = file_header[6]
-
+# bitfield of flags describing the file (e.g. executable, DLL, 32-bit) — not used directly in this tool
 build_date = datetime.datetime.fromtimestamp(time_date_stamp, datetime.UTC)
 
 address_of_entry_point = struct.unpack('<I', data[e_lfanew+40:e_lfanew+44])[0]
