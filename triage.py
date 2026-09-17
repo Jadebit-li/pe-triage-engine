@@ -57,12 +57,13 @@ time_date_stamp = file_header[2]
 # deprecated COFF debug field, typically 0 in modern PE files, unused in this tool
 pointer_to_symbol_table = file_header[3]
 number_of_symbols = file_header[4]
-# size in bytes of the Optional Header that follows; used to calculate where the Section Table starts
+# size in bytes of the Optional Header, used to calculate where the Section Table starts
 size_of_optional_header = file_header[5]
 characteristics = file_header[6]
 # bitfield of flags describing the file (e.g. executable, DLL, 32-bit) — not used directly in this tool
 build_date = datetime.datetime.fromtimestamp(time_date_stamp, datetime.UTC)
 
+#
 address_of_entry_point = struct.unpack('<I', data[e_lfanew+40:e_lfanew+44])[0]
 section_table_start = e_lfanew + 24 + size_of_optional_header
 optional_header_start = e_lfanew + 24
